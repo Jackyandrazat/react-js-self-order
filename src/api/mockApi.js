@@ -22,6 +22,21 @@ const categories = [
   { id: 2, name: "Minuman" },
 ];
 
+// Mock data for ingredients, tables, and orders
+let ingredients = [
+  { id: 101, name: "Beras", stock: 10, expired: false },
+  { id: 102, name: "Mie", stock: 5, expired: false },
+  { id: 103, name: "Telur", stock: 8, expired: false },
+];
+
+let tables = [
+  { id: 1, name: "Meja 1" },
+  { id: 2, name: "Meja 2" },
+  { id: 3, name: "Meja 3" },
+];
+
+let orders = [];
+
 export const getProducts = () => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
@@ -40,12 +55,54 @@ export const getCategories = () => {
   });
 };
 
+export const getIngredients = () => {
+  return Promise.resolve(ingredients);
+};
+
+export const getTables = () => {
+  return Promise.resolve(tables);
+};
+
 export const createOrder = (orderData) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      if (orderData && orderData.items.length > 0)
-        resolve({ success: true, orderId: Date.now() });
-      else reject("Order creation failed.");
+      if (orderData && orderData.items.length > 0) {
+        const newOrder = {
+          ...orderData,
+          id: Date.now(),
+          status: "waiting",
+          createdAt: new Date().toISOString(),
+        };
+        orders.push(newOrder);
+        resolve({ success: true, order: newOrder });
+      } else reject("Order creation failed.");
+    }, 700);
+  });
+};
+
+export const getOrders = (status) => {
+  return Promise.resolve(
+    status ? orders.filter((o) => o.status === status) : orders
+  );
+};
+
+export const verifyOrder = (orderId) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const order = orders.find((o) => o.id === orderId);
+      if (order) {
+        // Reduce stock for each ingredient in the order
+        order.items.forEach((item) => {
+          (item.ingredients || []).forEach((ing) => {
+            const stockItem = ingredients.find((i) => i.id === ing.id);
+            if (stockItem) stockItem.stock -= (ing.qty || 1) * (item.qty || 1);
+          });
+        });
+        order.status = "verified";
+        resolve({ success: true, order });
+      } else {
+        reject("Order not found");
+      }
     }, 700);
   });
 };
@@ -53,9 +110,25 @@ export const createOrder = (orderData) => {
 export const processPayment = (paymentData) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      if (paymentData && paymentData.amount > 0)
+      if (paymentData && paymentData.amount > 0) {
+        // Mark order as finished
+        const order = orders.find((o) => o.id === paymentData.orderId);
+        if (order) order.status = "done";
         resolve({ success: true, transactionId: Date.now() });
-      else reject("Payment processing failed.");
+      } else reject("Payment processing failed.");
     }, 800);
   });
+};
+
+export const getStockNotifications = () => {
+  return Promise.resolve(
+    ingredients
+      .filter((i) => i.stock < 3 || i.expired)
+      .map((i) => ({
+        message: i.expired
+          ? `Bahan ${i.name} sudah expired!`
+          : `Stok ${i.name} hampir habis!`,
+        type: i.expired ? "error" : "warning",
+      }))
+  );
 };

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 
 const useOrderStore = create((set) => ({
   items: [],
+  customerData: null,
   addItem: (item) =>
     set((state) => {
       const existingItem = state.items.find((i) => i.id === item.id);
@@ -24,7 +25,8 @@ const useOrderStore = create((set) => ({
     set((state) => ({
       items: state.items.filter((item) => item.id !== id),
     })),
-  clearItems: () => set({ items: [] }),
+  clearItems: () => set({ items: [], customerData: null }),
+  setCustomerData: (data) => set({ customerData: data }),
 }));
 
 export default useOrderStore;

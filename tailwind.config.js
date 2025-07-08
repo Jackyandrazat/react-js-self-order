@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+import tailwindcss from '@tailwindcss/vite';
+
 export default {
   darkMode: 'class', // Enable dark mode support
   content: [
@@ -32,5 +34,41 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    tailwindcss(),
+    require('daisyui'),
+    // shadcn/ui tidak perlu plugin khusus, hanya utility tailwind
+  ],
+  daisyui: {
+    themes: [
+      'light',
+      'dark',
+      'cupcake',
+      'bumblebee',
+      'corporate',
+      'synthwave',
+      'retro',
+      'cyberpunk',
+      'valentine',
+      'halloween',
+      'garden',
+      'forest',
+      'aqua',
+      'lofi',
+      'pastel',
+      'fantasy',
+      'wireframe',
+      'black',
+      'luxury',
+      'dracula',
+      'cmyk',
+      'autumn',
+      'business',
+      'acid',
+      'lemonade',
+      'night',
+      'coffee',
+      'winter',
+    ],
+  },
 }
